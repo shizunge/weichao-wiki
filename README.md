@@ -47,3 +47,4 @@ wiki setup for weichao
     use `sudo docker logs <container name>` to see logs of a container
     for example if you did not set the correct permission to the acme.json file, traefik will not work correctly. You will see an error in `sudo docker logs traefik`
 
+1. The compose files arr working on standalone docker (single host). They do not work with docker swarm mode.
