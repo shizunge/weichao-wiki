@@ -23,7 +23,9 @@ wiki setup for weichao
 1. optionally if you want to visit the traefik dashboard or gollum, you need setup authelia (for authorization).
 
     firstly change to root `sudo -s`
-    then call setup-script/authelia-gen-pw.sh, and type a
+    then call setup-script/authelia-gen-pw.sh, and type a user name and password
+
+    modify the domain name in ./volumes/authelia/etc/configuration.yml (currently it is set to `example.com`)
 
 1. optionally setup gollum git database
 
