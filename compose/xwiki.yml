@@ -1,0 +1,62 @@
+# The default password for the Admin user is admin. Make sure you change the password.
+version: '3.6'
+services:
+  xwiki:
+    image: "xwiki:lts-postgres-tomcat"
+    container_name: xwiki
+    restart: unless-stopped
+    depends_on:
+      - xwiki_db
+    hostname: xwiki
+    networks:
+      - traefik
+      - xwiki
+    # ports:
+    #   - "8080:8080"
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    environment:
+      - DB_USER=xwiki
+      - DB_PASSWORD=xwiki
+      - DB_HOST=xwiki-postgres-db
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/xwiki:/usr/local/xwiki
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.xwiki.entrypoints=websecure
+      - traefik.http.routers.xwiki.tls.certresolver=letsencrypt
+      - traefik.http.routers.xwiki.rule=Host(`wiki.${DOMAINNAME}`)
+      - traefik.http.services.xwiki.loadbalancer.server.port=8080
+      # - traefik.http.routers.xwiki.middlewares=authelia@docker
+
+  xwiki_db:
+    image: "postgres:12"
+    container_name: xwiki-postgres-db
+    restart: unless-stopped
+    networks:
+      - xwiki
+    env_file:
+      - ./env-global.env
+    environment:
+      - POSTGRES_ROOT_PASSWORD=xwiki
+      - POSTGRES_PASSWORD=xwiki
+      - POSTGRES_USER=xwiki
+      - POSTGRES_DB=xwiki
+      - POSTGRES_INITDB_ARGS="--encoding=UTF8"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/xwiki_db:/var/lib/postgresql/data
+    labels:
+      - traefik.enable=false
+
+networks:
+  traefik:
+    external:
+      name: traefik_network
+  xwiki:
+    internal: true
+

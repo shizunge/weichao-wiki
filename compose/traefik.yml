@@ -1,0 +1,64 @@
+version: "3.5"
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    command:
+      # - --log.level=DEBUG
+      - --global.sendAnonymousUsage=false
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/traefik/dynamic/conf
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      # - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      # - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      # enable features
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entrypoint=metrics
+      - --entrypoints.metrics.address=:8082
+      # - --tracing.datadog=true
+      # - --accesslog=true
+    hostname: traefik
+    networks:
+      - traefik
+    ports:
+      - 80:80
+      - 443:443
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/traefik/letsencrypt:/letsencrypt
+      - ${VOLUMEPATH}/traefik/dynamic-conf:/traefik/dynamic/conf
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - raefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.middlewares=authelia@docker
+        
+networks:
+  traefik:
+    external:
+      name: traefik_network
+

@@ -1,0 +1,82 @@
+version: '3.5'
+services:
+  documize:
+    image: targodan/documize:latest
+    container_name: documize
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    depends_on:
+      - documize_db
+    hostname: documize
+    networks:
+      - traefik
+      - documize
+    # ports:
+    #   - 2080:8080
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    environment:
+      - DOCUMIZE_DB_TYPE=postgresql
+      - DOCUMIZE_DB_CONNECTION=host=documize_db port=5432 dbname=documize user=documize password=documize sslmode=disable
+      # - DOCUMIZE_DB_TYPE=mariadb
+      # - DOCUMIZE_DB_CONNECTION=documize:documize@tcp(documize_db:3306)/documize
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.documize.entrypoints=websecure
+      - traefik.http.routers.documize.tls.certresolver=letsencrypt
+      - traefik.http.routers.documize.rule=Host(`documize.${DOMAINNAME}`)
+      - traefik.http.services.documize.loadbalancer.server.port=80
+      # - traefik.http.routers.documize.middlewares=authelia@docker
+
+  documize_db:
+    container_name: documize_db
+    image: postgres:12
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    hostname: documize_db
+    networks:
+      - documize
+    env_file:
+      - ./env-global.env
+    environment:
+      - POSTGRES_USER=documize
+      - POSTGRES_PASSWORD=documize
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/documize_db:/var/lib/postgresql/data
+    labels:
+      - traefik.enable=false
+
+  # documize_db:
+  #   container_name: documize_db
+  #   image: linuxserver/mariadb
+  #   restart: unless-stopped
+  #   # user: ${UID}:${GID}
+  #   hostname: documize_db
+  #   networks:
+  #     - documize
+  #   env_file:
+  #     - ./env-global.env
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=documize
+  #     - MYSQL_DATABASE=documize
+  #     - MYSQL_USER=documize
+  #     - MYSQL_PASSWORD=documize
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${VOLUMEPATH}/documize_db_maria:/config
+  #   labels:
+  #     - traefik.enable=false
+
+networks:
+  traefik:
+    external:
+      name: traefik_network
+  documize:
+    internal: true
+

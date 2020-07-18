@@ -1,0 +1,32 @@
+version: '3.6'
+services:
+  gollum:
+    image: shizunge/gollum:latest
+    container_name: gollum
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    hostname: gollum
+    networks:
+      - traefik
+    # ports:
+    #   - 8080:8080
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/gollum-wiki-data:/wiki
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.gollum.entrypoints=websecure
+      - traefik.http.routers.gollum.tls.certresolver=letsencrypt
+      - traefik.http.routers.gollum.rule=Host(`gollum.${DOMAINNAME}`)
+      - traefik.http.services.gollum.loadbalancer.server.port=8080
+      - traefik.http.routers.gollum.middlewares=authelia@docker
+
+networks:
+  traefik:
+    external:
+      name: traefik_network

@@ -1,0 +1,35 @@
+version: '3.5'
+
+services:
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    hostname: authelia
+    networks:
+      - traefik
+    expose:
+      - 9091
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/authelia/etc:/config:ro
+      - ${VOLUMEPATH}/authelia/var-lib:/var/lib/authelia
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.authelia.rule=Host(`auth.${DOMAINNAME}`)
+      - traefik.http.routers.authelia.entrypoints=websecure
+      - traefik.http.routers.authelia.tls.certresolver=letsencrypt
+      - traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.${DOMAINNAME}
+      - traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true
+      - traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User, Remote-Groups
+
+networks:
+  traefik:
+    external:
+      name: traefik_network
+

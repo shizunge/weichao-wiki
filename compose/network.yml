@@ -1,0 +1,22 @@
+version: "3.5"
+
+# What is this?
+#
+# This stack exists solely to deploy the traefik_public overlay network, so that
+# other stacks (including traefik-app) can attach to it
+
+services:
+  traefik_network_creator:
+    image: hello-world
+    container_name: traefik_network_creator
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    name: traefik_network
+    driver: bridge
+    attachable: true
+    ipam:
+      config:
+        - subnet: 172.31.240.0/20
