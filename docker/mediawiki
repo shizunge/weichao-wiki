@@ -1,0 +1,3 @@
+FROM mediawiki:latest
+RUN cd /var/www/html/extensions && git clone https://gerrit.wikimedia.org/r/mediawiki/extensions/VisualEditor.git
+RUN cd /var/www/html/extensions/VisualEditor && git submodule update --init

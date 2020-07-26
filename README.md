@@ -37,12 +37,27 @@ wiki setup for weichao
     sudo docker-compose -f ./compose/network.yml up -d
 
     The order of the rest services does not matter.
+    But you need to start traefik, authelia and mailhot, unless you modify the corresponding configuration files to remove the dependence.
 
     You could use setup.sh as well
 
-1. visit xwiki.example.com
+1. visit xwiki.example.com (or the domains set in the compose files)
     Many services have default user name and password, see the comments in docker-compose files or google it.
     Once you login, you can add new users.
+
+1. To run mediawiki:
+   
+   1. build mediawiki with virtual editor.
+      sudo docker build . -f ./docker/mediawiki -t shizun/mediawiki:latest
+   1. comment the line in ./compose/mediawiki.yml
+      # - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
+   1. start mediawiki: sudo docker-compose -f ./compose/mediawiki.yml up -d
+   1. visit mediawiki.example.com, setup and download LocalSettings.php
+      use db host: mediawiki_db, db user/password: mediawiki. They are set in ./compose/mediawiki.yml
+   1. copy LocalSettings.php to ${VOLUMEPATH}/mediawiki/LocalSettings.php
+   1. uncomment - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
+   1. stop mediawiki: sudo docker-compose -f ./compose/mediawiki.yml down
+   1. start mediawiki again: sudo docker-compose -f ./compose/mediawiki.yml up -d
 
 1. To debug
     find the names of running containers using `sudo docker ps`

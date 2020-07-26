@@ -1,0 +1,66 @@
+# the default admin details admin@admin.com with a password of password
+version: '3.5'
+services:
+  mediawiki:
+    image: shizun/mediawiki:latest
+    container_name: mediawiki
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    depends_on:
+      - mediawiki_db
+    hostname: mediawiki
+    networks:
+      - traefik
+      - mediawiki
+    # ports:
+    #   - 2080:8080
+    # dns:
+    #   - 172.31.254.254
+    env_file:
+      - ./env-global.env
+    # environment:
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # - ${VOLUMEPATH}/mediawiki:/config
+      # After initial setup, download LocalSettings.php to the same directory as
+      # this yaml and uncomment the following line and use compose to restart
+      # the mediawiki service
+      - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php  
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.mediawiki.entrypoints=websecure
+      - traefik.http.routers.mediawiki.tls.certresolver=letsencrypt
+      - traefik.http.routers.mediawiki.rule=Host(`mediawiki.${DOMAINNAME}`)
+      - traefik.http.services.mediawiki.loadbalancer.server.port=80
+      # - traefik.http.routers.mediawiki.middlewares=authelia@docker
+
+  mediawiki_db:
+    container_name: mediawiki_db
+    image: linuxserver/mariadb
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    hostname: mediawiki_db
+    networks:
+      - mediawiki
+    env_file:
+      - ./env-global.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=mediawiki
+      - MYSQL_DATABASE=mediawiki
+      - MYSQL_USER=mediawiki
+      - MYSQL_PASSWORD=mediawiki
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUMEPATH}/mediawiki_db:/config
+    labels:
+      - traefik.enable=false
+
+networks:
+  traefik:
+    external:
+      name: traefik_network
+  mediawiki:
+    internal: true
+
+
