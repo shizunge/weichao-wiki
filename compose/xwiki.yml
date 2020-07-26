@@ -29,7 +29,7 @@ services:
       - traefik.docker.network=traefik_network
       - traefik.http.routers.xwiki.entrypoints=websecure
       - traefik.http.routers.xwiki.tls.certresolver=letsencrypt
-      - traefik.http.routers.xwiki.rule=Host(`wiki.${DOMAINNAME}`)
+      - traefik.http.routers.xwiki.rule=Host(`xwiki.${DOMAINNAME}`)
       - traefik.http.services.xwiki.loadbalancer.server.port=8080
       # - traefik.http.routers.xwiki.middlewares=authelia@docker
 

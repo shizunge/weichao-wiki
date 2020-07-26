@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    restart: unless-stopped
+    # user: ${UID}:${GID}
+    hostname: mailhog
+    networks:
+      - traefik
+    # dns:
+    #   - ${NETWORK_DNS_IP}
+    env_file:
+      - ./env-global.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.mailhog.rule=Host(`mailhog.${DOMAINNAME}`)
+      - traefik.http.routers.mailhog.entrypoints=websecure
+      - traefik.http.routers.mailhog.tls.certresolver=letsencrypt
+      - traefik.http.services.mailhog.loadbalancer.server.port=8025
+      - traefik.http.routers.mailhog.middlewares=authelia@docker
+
+networks:
+  traefik:
+    external:
+      name: traefik_network
+

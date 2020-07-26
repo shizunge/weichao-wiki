@@ -1,9 +1,0 @@
-users:
-  123:
-    displayname: "user"
-    password: ""
-    email: user@example.com
-    groups:
-      - admins
-      - dev
-
