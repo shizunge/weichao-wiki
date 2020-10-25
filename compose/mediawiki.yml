@@ -2,7 +2,7 @@
 version: '3.5'
 services:
   mediawiki:
-    image: shizun/mediawiki:latest
+    image: mediawiki:1.35
     container_name: mediawiki
     restart: unless-stopped
     # user: ${UID}:${GID}

@@ -47,10 +47,8 @@ wiki setup for weichao
 
 1. To run mediawiki:
    
-   1. build mediawiki with virtual editor.
-      sudo docker build . -f ./docker/mediawiki -t shizun/mediawiki:latest
-   1. comment the line in ./compose/mediawiki.yml
-      # - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
+   1. comment the following line in ./compose/mediawiki.yml
+      - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
    1. start mediawiki: sudo docker-compose -f ./compose/mediawiki.yml up -d
    1. visit mediawiki.example.com, setup and download LocalSettings.php
       use db host: mediawiki_db, db user/password: mediawiki. They are set in ./compose/mediawiki.yml
