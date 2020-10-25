@@ -47,15 +47,18 @@ wiki setup for weichao
 
 1. To run mediawiki:
    
-   1. comment the following line in ./compose/mediawiki.yml
+   1. comment the following line in `./compose/mediawiki.yml`
       - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
-   1. start mediawiki: sudo docker-compose -f ./compose/mediawiki.yml up -d
-   1. visit mediawiki.example.com, setup and download LocalSettings.php
+   1. start mediawiki: `sudo docker-compose -f ./compose/mediawiki.yml up -d`
+   1. visit mediawiki.example.com, setup and download `LocalSettings.php`
       use db host: mediawiki_db, db user/password: mediawiki. They are set in ./compose/mediawiki.yml
-   1. copy LocalSettings.php to ${VOLUMEPATH}/mediawiki/LocalSettings.php
-   1. uncomment - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
-   1. stop mediawiki: sudo docker-compose -f ./compose/mediawiki.yml down
-   1. start mediawiki again: sudo docker-compose -f ./compose/mediawiki.yml up -d
+   1. Enable visual editor, by adding the following line to the end of `LocalSettings.php`.
+      - wfLoadExtension( 'VisualEditor' );
+   1. copy `LocalSettings.php` to `${VOLUMEPATH}/mediawiki/LocalSettings.php`
+   1. uncomment 
+      - ${VOLUMEPATH}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php 
+   1. stop mediawiki: `sudo docker-compose -f ./compose/mediawiki.yml down`
+   1. start mediawiki again: `sudo docker-compose -f ./compose/mediawiki.yml up -d`
 
 1. To debug
     find the names of running containers using `sudo docker ps`
